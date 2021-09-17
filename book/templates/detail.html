@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<form action="/book/detail/" method="get">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Search">
+</form>
+<h1>Here we can see the detail info about book with id {{ book.id }}</h1>
+<h1>Title: {{ book.name }}</h1>
+<h3>Short description: {{ book.description }}</h3>
+<h4>Authors: </h4>
+{% for author in book.authors.all %}
+<h5>{{ author.name }} {{ author.patronymic }}</h5>
+{% endfor %}
+{% endblock %}
