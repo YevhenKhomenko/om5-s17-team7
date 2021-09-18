@@ -32,7 +32,7 @@ USERS = [['john_doe@gmail.com', 'ololo', 'John', 'DJ', 'Doe'],
          ['susie_roy@gmail.com', 'reggy', 'Susie', 'SR', 'Roy']]
 
 data = np.random.randint(1,10,size=200)
-ORDERS = pd.DataFrame(data, columns=['users'])
+ORDERS = pd.DataFrame(data, columns=['author'])
 data2 = np.random.randint(1,136,size=200)
 ORDERS['books'] = data2
 

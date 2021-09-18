@@ -214,7 +214,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     @staticmethod
     def get_all():
         """
-        returns data for json request with QuerySet of all users
+        returns data for json request with QuerySet of all author
         """
         all_users = CustomUser.objects.all()
         return all_users
