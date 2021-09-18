@@ -5,6 +5,7 @@
     {{ form }}
     <input type="submit" value="Search">
 </form>
+
 <h1>Here we can see the detail info about book with id {{ book.id }}</h1>
 <h1>Title: {{ book.name }}</h1>
 <h3>Short description: {{ book.description }}</h3>
@@ -12,4 +13,24 @@
 {% for author in book.authors.all %}
 <h5>{{ author.name }} {{ author.patronymic }}</h5>
 {% endfor %}
+<h4>Count: {{ book.count }}</h4>
+
+
+
+<h4>Edit book info</h4>
+<form action="/book/detail/{{book.id}}" method="post">
+    Title
+    <input type="text" placeholder="Title" name="name" class="form-control" value="{{book.name}}"><br>
+    Description
+    <input type="text" placeholder="Description" name="description" class="form-control" value="{{book.description}}"><br>
+    Count
+    <input type="text" placeholder="Count" name="count" class="form-control" value="{{book.count}}"><br>
+    <button class="btn btn-success" type="submit">Update</button>
+{% csrf_token %}
+</form>
+
+<form action="/book/delete_book/{{book.id}}">
+    <button class="btn btn-success" type="submit">Delete book</button>
+</form>
+
 {% endblock %}
