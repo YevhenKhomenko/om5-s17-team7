@@ -136,3 +136,6 @@ class Author(models.Model):
         """
         all_users = Author.objects.all()
         return all_users
+
+    def get_full_name(self):
+        return f'{self.name} {self.patronymic} {self.surname}'
