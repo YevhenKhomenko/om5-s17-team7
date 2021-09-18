@@ -49,7 +49,7 @@ def first_view(request):
     paginator = Paginator(books, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'main.html', {'page_obj': page_obj, 'form': form})
+    return render(request, 'book/main.html', {'page_obj': page_obj, 'form': form})
 
 
 def by_author(request):
@@ -68,7 +68,7 @@ def by_author(request):
             paginator = Paginator(books, 10)
             page_number = request.GET.get('page')
             page_obj = paginator.get_page(page_number)
-            return render(request, 'author.html', {'page_obj': page_obj, 'author': author, 'form':form})
+            return render(request, 'book/author.html', {'page_obj': page_obj, 'author': author, 'form':form})
         # if a GET (or any other method) we'll create a blank form
     else:
         form = QueryForm()
@@ -76,7 +76,7 @@ def by_author(request):
         paginator = Paginator(books, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        return render(request, 'author.html', {'page_obj': page_obj, 'form':form})
+        return render(request, 'book/author.html', {'page_obj': page_obj, 'form':form})
 
 
 def by_user(request):
@@ -95,7 +95,7 @@ def by_user(request):
             paginator = Paginator(books, 10)
             page_number = request.GET.get('page')
             page_obj = paginator.get_page(page_number)
-            return render(request, 'user.html', { 'user': user, 'form': form, 'page_obj': page_obj})
+            return render(request, 'book/user.html', {'user': user, 'form': form, 'page_obj': page_obj})
         # if a GET (or any other method) we'll create a blank form
     else:
         form = UserForm()
@@ -103,7 +103,7 @@ def by_user(request):
         paginator = Paginator(books, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        return render(request, 'user.html', {'form': form, 'page_obj': page_obj})
+        return render(request, 'book/user.html', {'form': form, 'page_obj': page_obj})
 
 
 def detail(request, received_id=None):
@@ -116,7 +116,7 @@ def detail(request, received_id=None):
         if edit_book_form.is_valid():
             edit_book_form.save()
 
-        return render(request, 'detail.html', {'book': book, 'form': form, 'edit_book_form': edit_book_form})
+        return render(request, 'book/detail.html', {'book': book, 'form': form, 'edit_book_form': edit_book_form})
 
     if request.method == 'GET':
         if received_id:
@@ -126,7 +126,7 @@ def detail(request, received_id=None):
                 return HttpResponse('There are no such book')
             initial = {'id': received_id, 'name': book.name, 'description': book.description, 'count': book.count}
             edit_book_form = EditBookForm(initial=initial)
-            return render(request, 'detail.html', {'book': book, 'form': form, 'edit_book_form': edit_book_form})
+            return render(request, 'book/detail.html', {'book': book, 'form': form, 'edit_book_form': edit_book_form})
         else:
             query = request.GET.get('book_id')
             if query:
@@ -141,12 +141,12 @@ def detail(request, received_id=None):
                         return HttpResponse('There are no such book')
                     initial = {'id': received_id, 'name': book.name, 'description': book.description, 'count': book.count}
                     edit_book_form = EditBookForm(initial=initial)
-                    return render(request, 'detail.html', {'book': book, 'form': form, 'edit_book_form': edit_book_form})
+                    return render(request, 'book/detail.html', {'book': book, 'form': form, 'edit_book_form': edit_book_form})
                 # if a GET (or any other method) we'll create a blank form
             else:
                 form = BookIDForm()
                 edit_book_form = EditBookForm()
-                return render(request, 'detail.html', {'form': form, 'edit_book_form': edit_book_form})
+                return render(request, 'book/detail.html', {'form': form, 'edit_book_form': edit_book_form})
 
 
 def unordered(request):
@@ -154,7 +154,7 @@ def unordered(request):
     paginator = Paginator(books, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'unordered.html', {'page_obj': page_obj})
+    return render(request, 'book/unordered.html', {'page_obj': page_obj})
 
 
 def add_book(request):
@@ -167,12 +167,12 @@ def add_book(request):
                 count=form.cleaned_data['count']
             )
             book.save()
-        return redirect('books_homepage')
+        return redirect('books')
 
     else:
         form = EditBookForm()
 
-    return render(request, 'add_book.html', {'form': form})
+    return render(request, 'book/add_book.html', {'form': form})
 
 
 def delete_book(request, book_id):
