@@ -1,10 +1,11 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect
 from .models import Book
 from authentication.models import CustomUser
 from author.models import Author
 from order.models import Order
-from .forms import QueryForm, UserForm, BookIDForm, SortFilterForm
+from .forms import QueryForm, UserForm, BookIDForm, SortFilterForm, EditBookForm
 from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404
 
 
 def first_view(request):
@@ -48,7 +49,7 @@ def first_view(request):
     paginator = Paginator(books, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'main.html', {'page_obj': page_obj, 'form': form})
+    return render(request, 'book/main.html', {'page_obj': page_obj, 'form': form})
 
 
 def by_author(request):
@@ -67,7 +68,7 @@ def by_author(request):
             paginator = Paginator(books, 10)
             page_number = request.GET.get('page')
             page_obj = paginator.get_page(page_number)
-            return render(request, 'author.html', {'page_obj': page_obj, 'author': author, 'form':form})
+            return render(request, 'book/author.html', {'page_obj': page_obj, 'author': author, 'form':form})
         # if a GET (or any other method) we'll create a blank form
     else:
         form = QueryForm()
@@ -75,7 +76,7 @@ def by_author(request):
         paginator = Paginator(books, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        return render(request, 'author.html', {'page_obj': page_obj, 'form':form})
+        return render(request, 'book/author.html', {'page_obj': page_obj, 'form':form})
 
 
 def by_user(request):
@@ -94,7 +95,7 @@ def by_user(request):
             paginator = Paginator(books, 10)
             page_number = request.GET.get('page')
             page_obj = paginator.get_page(page_number)
-            return render(request, 'user.html', { 'user': user, 'form': form, 'page_obj': page_obj})
+            return render(request, 'book/user.html', {'user': user, 'form': form, 'page_obj': page_obj})
         # if a GET (or any other method) we'll create a blank form
     else:
         form = UserForm()
@@ -102,33 +103,50 @@ def by_user(request):
         paginator = Paginator(books, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        return render(request, 'user.html', {'form': form, 'page_obj': page_obj})
+        return render(request, 'book/user.html', {'form': form, 'page_obj': page_obj})
 
 
 def detail(request, received_id=None):
-    if received_id:
+
+    if request.method == 'POST':
         form = BookIDForm()
-        book = Book.get_by_id(received_id)
-        if book is None:
-            return HttpResponse('There are no such book')
-        return render(request, 'detail.html', {'book': book, 'form': form})
-    else:
-        query = request.GET.get('book_id')
-        if query:
-            # create a form instance and populate it with data from the request:
-            form = BookIDForm(request.GET)
-            # check whether it's valid:
-            if form.is_valid():
-                # process the data in form.cleaned_data as required
-                book_id = form.cleaned_data['book_id']
-                book = Book.get_by_id(book_id)
-                if book is None:
-                    return HttpResponse('There are no such book')
-                return render(request, 'detail.html', {'book': book, 'form': form})
-            # if a GET (or any other method) we'll create a blank form
-        else:
+        book = get_object_or_404(Book, id=received_id)
+        edit_book_form = EditBookForm(request.POST, instance=book)
+
+        if edit_book_form.is_valid():
+            edit_book_form.save()
+
+        return render(request, 'book/detail.html', {'book': book, 'form': form, 'edit_book_form': edit_book_form})
+
+    if request.method == 'GET':
+        if received_id:
             form = BookIDForm()
-            return render(request, 'detail.html', {'form': form})
+            book = Book.get_by_id(received_id)
+            if book is None:
+                return HttpResponse('There are no such book')
+            initial = {'id': received_id, 'name': book.name, 'description': book.description, 'count': book.count}
+            edit_book_form = EditBookForm(initial=initial)
+            return render(request, 'book/detail.html', {'book': book, 'form': form, 'edit_book_form': edit_book_form})
+        else:
+            query = request.GET.get('book_id')
+            if query:
+                # create a form instance and populate it with data from the request:
+                form = BookIDForm(request.GET)
+                # check whether it's valid:
+                if form.is_valid():
+                    # process the data in form.cleaned_data as required
+                    book_id = form.cleaned_data['book_id']
+                    book = Book.get_by_id(book_id)
+                    if book is None:
+                        return HttpResponse('There are no such book')
+                    initial = {'id': received_id, 'name': book.name, 'description': book.description, 'count': book.count}
+                    edit_book_form = EditBookForm(initial=initial)
+                    return render(request, 'book/detail.html', {'book': book, 'form': form, 'edit_book_form': edit_book_form})
+                # if a GET (or any other method) we'll create a blank form
+            else:
+                form = BookIDForm()
+                edit_book_form = EditBookForm()
+                return render(request, 'book/detail.html', {'form': form, 'edit_book_form': edit_book_form})
 
 
 def unordered(request):
@@ -136,6 +154,32 @@ def unordered(request):
     paginator = Paginator(books, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'unordered.html', {'page_obj': page_obj})
+    return render(request, 'book/unordered.html', {'page_obj': page_obj})
+
+
+def add_book(request):
+    if request.method == 'POST':
+        form = EditBookForm(request.POST)
+        if form.is_valid():
+            book = Book.objects.create(
+                name=form.cleaned_data['name'],
+                description=form.cleaned_data['description'],
+                count=form.cleaned_data['count']
+            )
+            book.save()
+        return redirect('books')
+
+    else:
+        form = EditBookForm()
+
+    return render(request, 'book/add_book.html', {'form': form})
+
+
+def delete_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    book.delete()
+    return redirect('books')
+
+
 
 

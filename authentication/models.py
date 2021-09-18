@@ -59,7 +59,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                  user email, user password, user updated_at, user created_at,
                  user role, user is_active
         """
-        return str(self.to_dict())[1:-1]
+        return f'{self.__class__.__name__}(id={self.id})'
 
     def __repr__(self):
         """
